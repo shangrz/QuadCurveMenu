@@ -37,6 +37,7 @@ typedef enum {
 @property (nonatomic, readonly) BOOL animating;
 @property (nonatomic, readonly) BOOL expanded;
 
+@property (nonatomic, assign, readonly) NSArray *menusPosition;
 @property (nonatomic, assign) CGFloat nearRadius;
 @property (nonatomic, assign) CGFloat endRadius;
 @property (nonatomic, assign) CGFloat farRadius;

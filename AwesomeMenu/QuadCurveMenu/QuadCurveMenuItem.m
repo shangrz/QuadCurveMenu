@@ -21,6 +21,7 @@
 @synthesize delegate;
 
 #pragma mark - initialization & cleaning up
+
 - (id)initWithImage:(UIImage *)img highlightedImage:(UIImage *)himg
        contentImage:(UIImage *)cimg contentHighlightedImage:(UIImage *)chimg
 {
@@ -37,11 +38,10 @@
 }
 
 #pragma mark - UIView's methods
+
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-//	[contentImageView sizeToFit];
-//	self.bounds = 
 
     self.bounds = CGRectMake(0, 0, self.image.size.width, self.image.size.height);
     
@@ -59,6 +59,7 @@
     }
     
 }
+
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
     // if move out of 2x rect, cancel highlighted.
@@ -70,6 +71,7 @@
     }
     
 }
+
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     self.highlighted = NO;
@@ -91,11 +93,17 @@
 }
 
 #pragma mark - instant methods
+
 - (void)setHighlighted:(BOOL)highlighted
 {
     [super setHighlighted:highlighted];
     [contentImageView setHighlighted:highlighted];
 }
 
+- (CGPoint)presentLayerPosition
+{
+	CALayer *presentLayer = self.layer.presentationLayer;
+	return presentLayer.position;
+}
 
 @end

@@ -9,6 +9,7 @@
 //  Copyright (c) 2012 Flubbermedia.com. All rights reserved.
 
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
 
 @protocol QuadCurveMenuItemDelegate;
 
@@ -25,6 +26,8 @@
 
 - (id)initWithImage:(UIImage *)img highlightedImage:(UIImage *)himg
        contentImage:(UIImage *)cimg contentHighlightedImage:(UIImage *)chimg;
+
+- (CGPoint)presentLayerPosition;
 
 @end
 

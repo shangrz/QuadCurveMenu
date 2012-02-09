@@ -30,8 +30,9 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 
 @interface QuadCurveMenu ()
 
-@property (nonatomic, strong) NSArray *menusArray;
 @property (nonatomic, strong) QuadCurveMenuItem *addButton;
+@property (nonatomic, strong) NSArray *menusArray;
+@property (nonatomic, retain) NSMutableArray *menusSavedPosition;
 
 - (void)doAnimation:(NSDictionary *)animationConfig;
 
@@ -47,6 +48,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 @synthesize delegate;
 @synthesize animating;
 @synthesize expanded;
+@synthesize menusPosition;
 
 @synthesize nearRadius;
 @synthesize endRadius;
@@ -56,8 +58,9 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 @synthesize menuWholeAngle;
 @synthesize startPoint;
 
-@synthesize menusArray;
 @synthesize addButton;
+@synthesize menusArray;
+@synthesize menusSavedPosition;
 
 #pragma mark - initialization & cleaning up
 
@@ -210,6 +213,8 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 	}
 }
 
+#pragma mark - Animation method
+
 - (void)doAnimation:(NSDictionary *)animationConfig
 {
 	QuadCurveMenuItem *item = [animationConfig objectForKey:kMenuItemKey];
@@ -248,6 +253,33 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 	item.center = itemCenter;
 }
 
+#pragma mark - utility methods
+
+- (NSArray *)menusPosition
+{
+	
+	if (!self.animating)
+		return nil;
+	
+	int i = 0;
+	NSMutableArray *returnArray = [NSMutableArray array];
+	for (QuadCurveMenuItem *item in menusArray)
+	{
+		
+		CGPoint savedPosition = [[self.menusSavedPosition objectAtIndex:i] CGPointValue];
+		CGPoint itemPosition = [item presentLayerPosition];
+		
+		if (CGPointEqualToPoint(savedPosition, itemPosition) == NO)
+		{
+			[self.menusSavedPosition replaceObjectAtIndex:i withObject:[NSValue valueWithCGPoint:itemPosition]];
+			[returnArray addObject:[NSValue valueWithCGPoint:itemPosition]];
+		}
+		i++;
+	}
+	
+	return returnArray;
+}
+
 #pragma mark - instant methods
 
 - (void)updateMenusData
@@ -276,7 +308,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 	[self updateMenusData];
 }
 
-#pragma mark - private animation methods
+#pragma mark - Animation definitions
 
 - (CAAnimationGroup *)expandAnimationForItem:(QuadCurveMenuItem *)item 
 {
