@@ -14,8 +14,8 @@
 static CGFloat const kQuadCurveMenuDefaultNearRadius = 110.0f;
 static CGFloat const kQuadCurveMenuDefaultEndRadius = 120.0f;
 static CGFloat const kQuadCurveMenuDefaultFarRadius = 140.0f;
-static CGFloat const kQuadCurveMenuDefaultStartPointX = 160.0;
-static CGFloat const kQuadCurveMenuDefaultStartPointY = 240.0;
+static CGFloat const kQuadCurveMenuDefaultStartPointX = 60.0;
+static CGFloat const kQuadCurveMenuDefaultStartPointY = 60.0;
 static CGFloat const kQuadCurveMenuDefaultTimeOffset = 0.036f;
 static CGFloat const kQuadCurveMenuDefaultRotateAngle = 0.0;
 static CGFloat const kQuadCurveMenuDefaultMenuWholeAngle = M_PI * 2;
@@ -30,6 +30,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 
 @interface QuadCurveMenu ()
 
+@property (nonatomic, assign) CGPoint startPoint;
 @property (nonatomic, strong) QuadCurveMenuItem *addButton;
 @property (nonatomic, strong) NSArray *menusArray;
 @property (nonatomic, retain) NSMutableArray *menusSavedPosition;

@@ -41,7 +41,8 @@ typedef enum {
 @property (nonatomic, assign) CGFloat nearRadius;
 @property (nonatomic, assign) CGFloat endRadius;
 @property (nonatomic, assign) CGFloat farRadius;
-@property (nonatomic, assign) CGPoint startPoint;
+// Disabled until updating works correctly
+// @property (nonatomic, assign) CGPoint startPoint;
 @property (nonatomic, assign) CGFloat timeOffset;
 @property (nonatomic, assign) CGFloat rotateAngle;
 @property (nonatomic, assign) CGFloat menuWholeAngle;

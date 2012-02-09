@@ -63,9 +63,9 @@
 	
 	// customize menu
 
-	/*
 	menu.rotateAngle = M_PI_2;
-	menu.menuWholeAngle = M_PI;
+	menu.menuWholeAngle = menu.rotateAngle / (menus.count - 1) * menus.count;
+	/*
 	menu.timeOffset = 0.2f;
 	menu.farRadius = 180.0f;
 	menu.endRadius = 100.0f;
