@@ -34,6 +34,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 @property (nonatomic, strong) NSArray *menusArray;
 @property (nonatomic, retain) NSMutableArray *menusSavedPosition;
 
+- (void)updateMenusData;
 - (void)doAnimation:(NSDictionary *)animationConfig;
 
 - (CAAnimationGroup *)expandAnimationForItem:(QuadCurveMenuItem *)item;
@@ -137,7 +138,45 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 - (UIImage*)contentHighlightedImage {
 	return self.addButton.contentImageView.highlightedImage;
 }
-                               
+
+#pragma mark - properties setters
+
+- (void)setNearRadius:(CGFloat)value
+{
+	nearRadius = value;
+	[self updateMenusData];
+};
+
+- (void)setEndRadius:(CGFloat)value
+{
+	endRadius = value;
+	[self updateMenusData];
+}
+
+- (void)setFarRadius:(CGFloat)value
+{
+	farRadius = value;
+	[self updateMenusData];
+}
+
+- (void)setStartPoint:(CGPoint)point
+{
+	startPoint = point;
+	[self updateMenusData];
+}
+
+- (void)setRotateAngle:(CGFloat)angle
+{
+	rotateAngle = angle;
+	[self updateMenusData];
+}
+
+- (void)setMenuWholeAngle:(CGFloat)angle
+{
+	menuWholeAngle = angle;
+	[self updateMenusData];
+}
+
 #pragma mark - UIView's methods
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
@@ -301,8 +340,10 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
         CGPoint farPoint = CGPointMake(startPoint.x + farRadius * sinf(i * menuWholeAngle / count), startPoint.y - farRadius * cosf(i * menuWholeAngle / count));
         item.farPoint = RotateCGPointAroundCenter(farPoint, startPoint, rotateAngle);  
         item.center = item.startPoint;
-        item.delegate = self;
-		[self insertSubview:item atIndex:0];
+		if (![item superview])
+		{
+			[self insertSubview:item atIndex:0];
+		}
     }
 }
 
@@ -310,6 +351,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 {	
     [menusArray makeObjectsPerformSelector:@selector(removeFromSuperview)];
 	menusArray = aMenusArray;
+	[menusArray makeObjectsPerformSelector:@selector(setDelegate:) withObject:self];
 	[self updateMenusData];
 }
 
