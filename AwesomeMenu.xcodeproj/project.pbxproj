@@ -30,6 +30,8 @@
 		5C3FF3701486564E0098EE93 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C3FF36F1486564E0098EE93 /* main.m */; };
 		5C3FF3741486564E0098EE93 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C3FF3731486564E0098EE93 /* AppDelegate.m */; };
 		5C93DC61148673F2003029CA /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C93DC60148673F2003029CA /* QuartzCore.framework */; };
+		6553244C14E2EBDD00D1CD82 /* AwesomeMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6553244A14E2EBDC00D1CD82 /* AwesomeMenuViewController.m */; };
+		6553244D14E2EBDD00D1CD82 /* AwesomeMenuViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6553244B14E2EBDD00D1CD82 /* AwesomeMenuViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +64,9 @@
 		5C3FF3721486564E0098EE93 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		5C3FF3731486564E0098EE93 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		5C93DC60148673F2003029CA /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		6553244914E2EBDC00D1CD82 /* AwesomeMenuViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AwesomeMenuViewController.h; sourceTree = "<group>"; };
+		6553244A14E2EBDC00D1CD82 /* AwesomeMenuViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AwesomeMenuViewController.m; sourceTree = "<group>"; };
+		6553244B14E2EBDD00D1CD82 /* AwesomeMenuViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AwesomeMenuViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,10 +147,13 @@
 		5C3FF3691486564E0098EE93 /* AwesomeMenu */ = {
 			isa = PBXGroup;
 			children = (
-				5C0364891488A5D4000CE00F /* Images */,
-				5C0364981488A5D4000CE00F /* QuadCurveMenu */,
 				5C3FF3721486564E0098EE93 /* AppDelegate.h */,
 				5C3FF3731486564E0098EE93 /* AppDelegate.m */,
+				6553244914E2EBDC00D1CD82 /* AwesomeMenuViewController.h */,
+				6553244A14E2EBDC00D1CD82 /* AwesomeMenuViewController.m */,
+				6553244B14E2EBDD00D1CD82 /* AwesomeMenuViewController.xib */,
+				5C0364891488A5D4000CE00F /* Images */,
+				5C0364981488A5D4000CE00F /* QuadCurveMenu */,
 				5C3FF36A1486564E0098EE93 /* Supporting Files */,
 			);
 			path = AwesomeMenu;
@@ -227,6 +235,7 @@
 				5C0364A81488A5D4000CE00F /* icon-plus@2x.png in Resources */,
 				5C0364A91488A5D4000CE00F /* icon-star.png in Resources */,
 				5C0364AA1488A5D4000CE00F /* icon-star@2x.png in Resources */,
+				6553244D14E2EBDD00D1CD82 /* AwesomeMenuViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,6 +250,7 @@
 				5C3FF3741486564E0098EE93 /* AppDelegate.m in Sources */,
 				5C0364AB1488A5D4000CE00F /* QuadCurveMenu.m in Sources */,
 				5C0364AC1488A5D4000CE00F /* QuadCurveMenuItem.m in Sources */,
+				6553244C14E2EBDD00D1CD82 /* AwesomeMenuViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,10 +314,11 @@
 		5C3FF3781486564E0098EE93 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AwesomeMenu/AwesomeMenu-Prefix.pch";
 				INFOPLIST_FILE = "AwesomeMenu/AwesomeMenu-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -316,10 +327,11 @@
 		5C3FF3791486564E0098EE93 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AwesomeMenu/AwesomeMenu-Prefix.pch";
 				INFOPLIST_FILE = "AwesomeMenu/AwesomeMenu-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

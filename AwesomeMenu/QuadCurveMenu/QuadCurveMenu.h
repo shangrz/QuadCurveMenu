@@ -5,31 +5,37 @@
 //  Created by Levey on 11/30/11.
 //  Copyright (c) 2011 lunaapp.com. All rights reserved.
 //
+//	Amended by Andrea Ottolina on 08/02/12
+//  Copyright (c) 2012 Flubbermedia.com. All rights reserved.
 
 #import <UIKit/UIKit.h>
 #import "QuadCurveMenuItem.h"
 
+#define kAnimationTypeKey		@"animationTypeKey"
+#define kMenuItemKey			@"menuItemKey"
+
+
+typedef enum {
+	AnimationTypeNone = 0,
+	AnimationTypeExpand,
+	AnimationTypeClose,
+	AnimationTypeBlowup,
+	AnimationTypeShrink
+} AnimationType;
+
 @protocol QuadCurveMenuDelegate;
 
-
 @interface QuadCurveMenu : UIView <QuadCurveMenuItemDelegate>
-{
-    NSArray *_menusArray;
-    int _flag;
-    NSTimer *_timer;
-    QuadCurveMenuItem *_addButton;
-    
-    id<QuadCurveMenuDelegate> _delegate;
 
-}
-@property (nonatomic, copy) NSArray *menusArray;
-@property (nonatomic, getter = isExpanding) BOOL expanding;
-@property (nonatomic, assign) id<QuadCurveMenuDelegate> delegate;
+@property (nonatomic, weak) id<QuadCurveMenuDelegate> delegate;
 
-@property (nonatomic, retain) UIImage *image;
-@property (nonatomic, retain) UIImage *highlightedImage;
-@property (nonatomic, retain) UIImage *contentImage;
-@property (nonatomic, retain) UIImage *highlightedContentImage;
+@property (nonatomic, strong) UIImage *image;
+@property (nonatomic, strong) UIImage *highlightedImage;
+@property (nonatomic, strong) UIImage *contentImage;
+@property (nonatomic, strong) UIImage *contentHighlightedImage;
+
+@property (nonatomic, readonly) BOOL animating;
+@property (nonatomic, readonly) BOOL expanded;
 
 @property (nonatomic, assign) CGFloat nearRadius;
 @property (nonatomic, assign) CGFloat endRadius;
@@ -40,8 +46,11 @@
 @property (nonatomic, assign) CGFloat menuWholeAngle;
 
 - (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray;
+
 @end
 
 @protocol QuadCurveMenuDelegate <NSObject>
+
 - (void)quadCurveMenu:(QuadCurveMenu *)menu didSelectIndex:(NSInteger)idx;
+
 @end

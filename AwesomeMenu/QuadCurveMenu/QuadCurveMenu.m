@@ -5,6 +5,8 @@
 //  Created by Levey on 11/30/11.
 //  Copyright (c) 2011 lunaapp.com. All rights reserved.
 //
+//	Amended by Andrea Ottolina on 08/02/12
+//  Copyright (c) 2012 Flubbermedia.com. All rights reserved.
 
 #import "QuadCurveMenu.h"
 #import <QuartzCore/QuartzCore.h>
@@ -18,7 +20,6 @@ static CGFloat const kQuadCurveMenuDefaultTimeOffset = 0.036f;
 static CGFloat const kQuadCurveMenuDefaultRotateAngle = 0.0;
 static CGFloat const kQuadCurveMenuDefaultMenuWholeAngle = M_PI * 2;
 
-
 static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float angle)
 {
     CGAffineTransform translation = CGAffineTransformMakeTranslation(center.x, center.y);
@@ -28,25 +29,45 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 }
 
 @interface QuadCurveMenu ()
-- (void)_expand;
-- (void)_close;
-- (void)_setMenu;
-- (CAAnimationGroup *)_blowupAnimationAtPoint:(CGPoint)p;
-- (CAAnimationGroup *)_shrinkAnimationAtPoint:(CGPoint)p;
+
+@property (nonatomic, strong) NSArray *menusArray;
+@property (nonatomic, strong) QuadCurveMenuItem *addButton;
+
+- (void)doAnimation:(NSDictionary *)animationConfig;
+
+- (CAAnimationGroup *)expandAnimationForItem:(QuadCurveMenuItem *)item;
+- (CAAnimationGroup *)closeAnimationForItem:(QuadCurveMenuItem *)item;
+- (CAAnimationGroup *)blowupAnimationAtPoint:(CGPoint)p;
+- (CAAnimationGroup *)shrinkAnimationAtPoint:(CGPoint)p;
+
 @end
 
 @implementation QuadCurveMenu
 
-@synthesize nearRadius, endRadius, farRadius, timeOffset, rotateAngle, menuWholeAngle, startPoint;
-@synthesize expanding = _expanding;
-@synthesize delegate = _delegate;
-@synthesize menusArray = _menusArray;
+@synthesize delegate;
+@synthesize animating;
+@synthesize expanded;
+
+@synthesize nearRadius;
+@synthesize endRadius;
+@synthesize farRadius;
+@synthesize timeOffset;
+@synthesize rotateAngle;
+@synthesize menuWholeAngle;
+@synthesize startPoint;
+
+@synthesize menusArray;
+@synthesize addButton;
 
 #pragma mark - initialization & cleaning up
+
 - (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray
 {
     self = [super initWithFrame:frame];
     if (self) {
+		
+		expanded = NO;
+		
         self.backgroundColor = [UIColor clearColor];
 		
 		self.nearRadius = kQuadCurveMenuDefaultNearRadius;
@@ -61,159 +82,181 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
         self.menusArray = aMenusArray;
         
         // add the "Add" Button.
-        _addButton = [[QuadCurveMenuItem alloc] initWithImage:[UIImage imageNamed:@"bg-addbutton.png"]
-                                       highlightedImage:[UIImage imageNamed:@"bg-addbutton-highlighted.png"] 
-                                           ContentImage:[UIImage imageNamed:@"icon-plus.png"] 
-                                highlightedContentImage:[UIImage imageNamed:@"icon-plus-highlighted.png"]];
-        _addButton.delegate = self;
-        _addButton.center = CGPointMake(kQuadCurveMenuDefaultStartPointX, kQuadCurveMenuDefaultStartPointY);
-        [self addSubview:_addButton];
+		self.addButton = [[QuadCurveMenuItem alloc] initWithImage:[UIImage imageNamed:@"bg-addbutton.png"] highlightedImage:[UIImage imageNamed:@"bg-addbutton-highlighted.png"] 
+													 contentImage:[UIImage imageNamed:@"icon-plus.png"] contentHighlightedImage:[UIImage imageNamed:@"icon-plus-highlighted.png"]];
+
+		self.addButton.delegate = self;
+        self.addButton.center = CGPointMake(kQuadCurveMenuDefaultStartPointX, kQuadCurveMenuDefaultStartPointY);
+        [self addSubview:self.addButton];
     }
     return self;
 }
 
-- (void)dealloc
-{
-    [_addButton release];
-    [_menusArray release];
-    [super dealloc];
-}
 
 
 #pragma mark - images
 
-
 - (void)setImage:(UIImage *)image {
-	_addButton.image = image;
+	self.addButton.image = image;
 }
 
 - (UIImage*)image {
-	return _addButton.image;
+	return self.addButton.image;
 }
 
 - (void)setHighlightedImage:(UIImage *)highlightedImage {
-	_addButton.highlightedImage = highlightedImage;
+	self.addButton.highlightedImage = highlightedImage;
 }
 
 - (UIImage*)highlightedImage {
-	return _addButton.highlightedImage;
+	return self.addButton.highlightedImage;
 }
 
-
 - (void)setContentImage:(UIImage *)contentImage {
-	_addButton.contentImageView.image = contentImage;
+	self.addButton.contentImageView.image = contentImage;
 }
 
 - (UIImage*)contentImage {
-	return _addButton.contentImageView.image;
+	return self.addButton.contentImageView.image;
 }
 
-
-- (void)setHighlightedContentImage:(UIImage *)highlightedContentImage {
-	_addButton.contentImageView.highlightedImage = highlightedContentImage;
+- (void)setContentHighlightedImage:(UIImage *)contentHighlightedImage {
+	self.addButton.contentImageView.highlightedImage = contentHighlightedImage;
 }
 
-- (UIImage*)highlightedContentImage {
-	return _addButton.contentImageView.highlightedImage;
+- (UIImage*)contentHighlightedImage {
+	return self.addButton.contentImageView.highlightedImage;
 }
 
 
                                
 #pragma mark - UIView's methods
+
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
 {
-    // if the menu state is expanding, everywhere can be touch
-    // otherwise, only the add button are can be touch
-    if (YES == _expanding) 
+    // if the menu is expanding, you can touch everywhere.
+    // only the add button can be touched otherwise...
+	if (expanded) 
     {
         return YES;
     }
-    else
-    {
-        return CGRectContainsPoint(_addButton.frame, point);
-    }
+	return CGRectContainsPoint(addButton.frame, point);
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    self.expanding = !self.isExpanding;
+    [self quadCurveMenuItemTouchesEnd:addButton];
 }
 
 #pragma mark - QuadCurveMenuItem delegates
+
 - (void)quadCurveMenuItemTouchesBegan:(QuadCurveMenuItem *)item
 {
-    if (item == _addButton) 
-    {
-        self.expanding = !self.isExpanding;
-    }
+	//
 }
+
 - (void)quadCurveMenuItemTouchesEnd:(QuadCurveMenuItem *)item
 {
-    // exclude the "add" button
-    if (item == _addButton) 
-    {
-        return;
-    }
-    // blowup the selected menu button
-    CAAnimationGroup *blowup = [self _blowupAnimationAtPoint:item.center];
-    [item.layer addAnimation:blowup forKey:@"blowup"];
-    item.center = item.startPoint;
-    
-    // shrink other menu buttons
-    for (int i = 0; i < [_menusArray count]; i ++)
-    {
-        QuadCurveMenuItem *otherItem = [_menusArray objectAtIndex:i];
-        CAAnimationGroup *shrink = [self _shrinkAnimationAtPoint:otherItem.center];
-        if (otherItem.tag == item.tag) {
-            continue;
-        }
-        [otherItem.layer addAnimation:shrink forKey:@"shrink"];
+	AnimationType animationType = AnimationTypeNone;
+	animating = YES;
+	
+	if ([item isEqual:addButton])
+	{
+		expanded = !expanded;
+		animationType = (expanded) ? AnimationTypeExpand : AnimationTypeClose;
+		float angle = expanded ? - M_PI_4 : 0.0f;
+		[UIView animateWithDuration:0.2f animations:^{
+			item.transform = CGAffineTransformMakeRotation(angle);
+		}];
+	}
+	else
+	{
+		expanded = NO;
+		
+		if ([self.delegate respondsToSelector:@selector(quadCurveMenu:didSelectIndex:)])
+		{
+			[self.delegate quadCurveMenu:self didSelectIndex:[menusArray indexOfObject:item]];
+		}
+	}
+	
+	for (QuadCurveMenuItem *arrayItem in menusArray)
+	{
+		NSTimeInterval delay = [menusArray indexOfObject:arrayItem] * timeOffset;
+		
+		if (animationType != AnimationTypeExpand && animationType != AnimationTypeClose)
+		{
+			animationType = ([item isEqual:arrayItem]) ? AnimationTypeBlowup : AnimationTypeShrink;
+			delay = 0;
+		}
+		
+		NSDictionary *animationDictionary = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:arrayItem, [NSNumber numberWithInt:animationType], nil]
+																		forKeys:[NSArray arrayWithObjects:kMenuItemKey, kAnimationTypeKey, nil]];
+		
+		[self performSelector:@selector(doAnimation:) withObject:animationDictionary afterDelay:delay];
+	}
 
-        otherItem.center = otherItem.startPoint;
-    }
-    _expanding = NO;
-    
-    // rotate "add" button
-    float angle = self.isExpanding ? -M_PI_4 : 0.0f;
-    [UIView animateWithDuration:0.2f animations:^{
-        _addButton.transform = CGAffineTransformMakeRotation(angle);
-    }];
-    
-    if ([_delegate respondsToSelector:@selector(quadCurveMenu:didSelectIndex:)])
-    {
-        [_delegate quadCurveMenu:self didSelectIndex:item.tag - 1000];
-    }
+}
+
+- (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag
+{
+	AnimationType animationType = [[theAnimation valueForKey:kAnimationTypeKey] intValue];
+	int checkAnimation = [menusArray count] - 1;
+	// Uncomment below line if you want to do the check on inverted order animations
+	//int checkAnimation = (expanded) ? [menusArray count] - 1 : 0;
+	
+	if (checkAnimation == animationType && flag)
+	{
+		animating = NO;
+	}
+}
+
+- (void)doAnimation:(NSDictionary *)animationConfig
+{
+	QuadCurveMenuItem *item = [animationConfig objectForKey:kMenuItemKey];
+	AnimationType animationType = [[animationConfig objectForKey:kAnimationTypeKey] intValue];
+	
+	CAAnimationGroup *animationGroup;
+	CGPoint itemCenter = item.startPoint;
+	
+	switch (animationType) {
+			
+		case AnimationTypeExpand:
+			animationGroup = [self expandAnimationForItem:item];
+			itemCenter = item.endPoint;	
+			break;
+			
+		case AnimationTypeClose:
+			animationGroup = [self closeAnimationForItem:item];
+			break;
+			
+		case AnimationTypeBlowup:
+			animationGroup = [self blowupAnimationAtPoint:item.center];
+			break;
+			
+		case AnimationTypeShrink:
+			animationGroup = [self shrinkAnimationAtPoint:item.center];
+			break;
+			
+		default:
+			return;
+	}
+	
+	[animationGroup setValue:[NSNumber numberWithInt:animationType] forKey:kAnimationTypeKey];
+	[animationGroup setDelegate:self];
+	
+	[item.layer addAnimation:animationGroup forKey:nil];
+	item.center = itemCenter;
 }
 
 #pragma mark - instant methods
-- (void)setMenusArray:(NSArray *)aMenusArray
-{	
-    if (aMenusArray == _menusArray)
-    {
-        return;
-    }
-    [_menusArray release];
-    _menusArray = [aMenusArray copy];
-    
-    
-    // clean subviews
-    for (UIView *v in self.subviews) 
-    {
-        if (v.tag >= 1000) 
-        {
-            [v removeFromSuperview];
-        }
-    }
-}
 
-
-- (void)_setMenu {
-	int count = [_menusArray count];
-    for (int i = 0; i < count; i ++)
-    {
-        QuadCurveMenuItem *item = [_menusArray objectAtIndex:i];
-        item.tag = 1000 + i;
-        item.startPoint = startPoint;
+- (void)updateMenusData
+{
+	short count = [menusArray count];
+	for (QuadCurveMenuItem *item in menusArray)
+	{
+		short i = [menusArray indexOfObject:item];
+		item.startPoint = startPoint;
         CGPoint endPoint = CGPointMake(startPoint.x + endRadius * sinf(i * menuWholeAngle / count), startPoint.y - endRadius * cosf(i * menuWholeAngle / count));
         item.endPoint = RotateCGPointAroundCenter(endPoint, startPoint, rotateAngle);
         CGPoint nearPoint = CGPointMake(startPoint.x + nearRadius * sinf(i * menuWholeAngle / count), startPoint.y - nearRadius * cosf(i * menuWholeAngle / count));
@@ -222,52 +265,21 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
         item.farPoint = RotateCGPointAroundCenter(farPoint, startPoint, rotateAngle);  
         item.center = item.startPoint;
         item.delegate = self;
-		[self insertSubview:item belowSubview:_addButton];
+		[self insertSubview:item atIndex:0];
     }
 }
 
-- (BOOL)isExpanding
-{
-    return _expanding;
+- (void)setMenusArray:(NSArray *)aMenusArray
+{	
+    [menusArray makeObjectsPerformSelector:@selector(removeFromSuperview)];
+	menusArray = aMenusArray;
+	[self updateMenusData];
 }
-- (void)setExpanding:(BOOL)expanding
+
+#pragma mark - private animation methods
+
+- (CAAnimationGroup *)expandAnimationForItem:(QuadCurveMenuItem *)item 
 {
-	
-	if (expanding) {
-		[self _setMenu];
-	}
-	
-    _expanding = expanding;    
-    
-    // rotate add button
-    float angle = self.isExpanding ? -M_PI_4 : 0.0f;
-    [UIView animateWithDuration:0.2f animations:^{
-        _addButton.transform = CGAffineTransformMakeRotation(angle);
-    }];
-    
-    // expand or close animation
-    if (!_timer) 
-    {
-        _flag = self.isExpanding ? 0 : ([_menusArray count] - 1);
-        SEL selector = self.isExpanding ? @selector(_expand) : @selector(_close);
-        _timer = [[NSTimer scheduledTimerWithTimeInterval:timeOffset target:self selector:selector userInfo:nil repeats:YES] retain];
-    }
-}
-#pragma mark - private methods
-- (void)_expand
-{
-	
-    if (_flag == [_menusArray count])
-    {
-        [_timer invalidate];
-        [_timer release];
-        _timer = nil;
-        return;
-    }
-    
-    int tag = 1000 + _flag;
-    QuadCurveMenuItem *item = (QuadCurveMenuItem *)[self viewWithTag:tag];
-    
     CAKeyframeAnimation *rotateAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.rotation.z"];
     rotateAnimation.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:M_PI],[NSNumber numberWithFloat:0.0f], nil];
     rotateAnimation.duration = 0.5f;
@@ -289,27 +301,13 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
     animationgroup.animations = [NSArray arrayWithObjects:positionAnimation, rotateAnimation, nil];
     animationgroup.duration = 0.5f;
     animationgroup.fillMode = kCAFillModeForwards;
-    animationgroup.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
-    [item.layer addAnimation:animationgroup forKey:@"Expand"];
-    item.center = item.endPoint;
-    
-    _flag ++;
-    
+    animationgroup.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];    
+	
+	return animationgroup;
 }
 
-- (void)_close
+- (CAAnimationGroup *)closeAnimationForItem:(QuadCurveMenuItem *)item
 {
-    if (_flag == -1)
-    {
-        [_timer invalidate];
-        [_timer release];
-        _timer = nil;
-        return;
-    }
-    
-    int tag = 1000 + _flag;
-     QuadCurveMenuItem *item = (QuadCurveMenuItem *)[self viewWithTag:tag];
-    
     CAKeyframeAnimation *rotateAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.rotation.z"];
     rotateAnimation.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f],[NSNumber numberWithFloat:M_PI * 2],[NSNumber numberWithFloat:0.0f], nil];
     rotateAnimation.duration = 0.5f;
@@ -332,12 +330,11 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
     animationgroup.duration = 0.5f;
     animationgroup.fillMode = kCAFillModeForwards;
     animationgroup.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
-    [item.layer addAnimation:animationgroup forKey:@"Close"];
-    item.center = item.startPoint;
-    _flag --;
+	
+	return animationgroup;
 }
 
-- (CAAnimationGroup *)_blowupAnimationAtPoint:(CGPoint)p
+- (CAAnimationGroup *)blowupAnimationAtPoint:(CGPoint)p
 {
     CAKeyframeAnimation *positionAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
     positionAnimation.values = [NSArray arrayWithObjects:[NSValue valueWithCGPoint:p], nil];
@@ -353,11 +350,11 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
     animationgroup.animations = [NSArray arrayWithObjects:positionAnimation, scaleAnimation, opacityAnimation, nil];
     animationgroup.duration = 0.3f;
     animationgroup.fillMode = kCAFillModeForwards;
-
+	
     return animationgroup;
 }
 
-- (CAAnimationGroup *)_shrinkAnimationAtPoint:(CGPoint)p
+- (CAAnimationGroup *)shrinkAnimationAtPoint:(CGPoint)p
 {
     CAKeyframeAnimation *positionAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
     positionAnimation.values = [NSArray arrayWithObjects:[NSValue valueWithCGPoint:p], nil];
@@ -376,6 +373,5 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
     
     return animationgroup;
 }
-
 
 @end
