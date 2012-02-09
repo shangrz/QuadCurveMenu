@@ -91,6 +91,13 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 		self.addButton.delegate = self;
         self.addButton.center = CGPointMake(kQuadCurveMenuDefaultStartPointX, kQuadCurveMenuDefaultStartPointY);
         [self addSubview:self.addButton];
+		
+		// array initialisation
+		self.menusSavedPosition = [NSMutableArray array];
+		for (QuadCurveMenuItem *item in menusArray)
+		{
+			[self.menusSavedPosition addObject:[NSValue valueWithCGPoint:addButton.center]];
+		}
     }
     return self;
 }
@@ -130,8 +137,6 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 - (UIImage*)contentHighlightedImage {
 	return self.addButton.contentImageView.highlightedImage;
 }
-
-
                                
 #pragma mark - UIView's methods
 
