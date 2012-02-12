@@ -33,7 +33,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 @property (nonatomic, assign) CGPoint startPoint;
 @property (nonatomic, strong) QuadCurveMenuItem *addButton;
 @property (nonatomic, strong) NSArray *menusArray;
-@property (nonatomic, retain) NSMutableArray *menusSavedPosition;
+@property (nonatomic, strong) NSMutableArray *menusSavedPosition;
 
 - (void)updateMenusData;
 - (void)doAnimation:(NSDictionary *)animationConfig;
@@ -247,12 +247,12 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 
 - (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag
 {
-	AnimationType animationType = [[theAnimation valueForKey:kAnimationTypeKey] intValue];
-	int checkAnimation = [menusArray count] - 1;
+	int animationOrder = [[theAnimation valueForKey:kAnimationOrder] intValue];
+	int animationCheck = [menusArray count] - 1;
 	// Uncomment below line if you want to do the check on inverted order animations
 	//int checkAnimation = (expanded) ? [menusArray count] - 1 : 0;
 	
-	if (checkAnimation == animationType && flag)
+	if (animationOrder == animationCheck && flag)
 	{
 		animating = NO;
 	}
@@ -264,6 +264,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 {
 	QuadCurveMenuItem *item = [animationConfig objectForKey:kMenuItemKey];
 	AnimationType animationType = [[animationConfig objectForKey:kAnimationTypeKey] intValue];
+	int counter = [menusArray indexOfObject:item];
 	
 	CAAnimationGroup *animationGroup;
 	CGPoint itemCenter = item.startPoint;
@@ -291,7 +292,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 			return;
 	}
 	
-	[animationGroup setValue:[NSNumber numberWithInt:animationType] forKey:kAnimationTypeKey];
+	[animationGroup setValue:[NSNumber numberWithInt:counter] forKey:kAnimationOrder];
 	[animationGroup setDelegate:self];
 	
 	[item.layer addAnimation:animationGroup forKey:nil];
@@ -302,22 +303,28 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 
 - (NSArray *)menusPosition
 {
-	
+
 	if (!self.animating)
 		return nil;
 	
 	int i = 0;
 	NSMutableArray *returnArray = [NSMutableArray array];
-	for (QuadCurveMenuItem *item in menusArray)
+	for (QuadCurveMenuItem *item in self.menusArray)
 	{
 		
-		CGPoint savedPosition = [[self.menusSavedPosition objectAtIndex:i] CGPointValue];
-		CGPoint itemPosition = [item presentLayerPosition];
-		
-		if (CGPointEqualToPoint(savedPosition, itemPosition) == NO)
+		@try
 		{
-			[self.menusSavedPosition replaceObjectAtIndex:i withObject:[NSValue valueWithCGPoint:itemPosition]];
-			[returnArray addObject:[NSValue valueWithCGPoint:itemPosition]];
+			CGPoint savedPosition = [[self.menusSavedPosition objectAtIndex:i] CGPointValue];
+			CGPoint itemPosition = [item presentLayerPosition];
+			
+			if (CGPointEqualToPoint(savedPosition, itemPosition) == NO)
+			{
+				[self.menusSavedPosition replaceObjectAtIndex:i withObject:[NSValue valueWithCGPoint:itemPosition]];
+				[returnArray addObject:[NSValue valueWithCGPoint:itemPosition]];
+			}
+		}
+		@catch (NSException *exception) {
+			
 		}
 		i++;
 	}

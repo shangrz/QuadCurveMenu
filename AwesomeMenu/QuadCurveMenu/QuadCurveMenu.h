@@ -11,9 +11,9 @@
 #import <UIKit/UIKit.h>
 #import "QuadCurveMenuItem.h"
 
-#define kAnimationTypeKey		@"animationTypeKey"
 #define kMenuItemKey			@"menuItemKey"
-
+#define kAnimationTypeKey		@"animationTypeKey"
+#define kAnimationOrder			@"animationOrder"
 
 typedef enum {
 	AnimationTypeNone = 0,
@@ -37,7 +37,7 @@ typedef enum {
 @property (nonatomic, readonly) BOOL animating;
 @property (nonatomic, readonly) BOOL expanded;
 
-@property (nonatomic, assign, readonly) NSArray *menusPosition;
+@property (atomic, assign, readonly) NSArray *menusPosition;
 @property (nonatomic, assign) CGFloat nearRadius;
 @property (nonatomic, assign) CGFloat endRadius;
 @property (nonatomic, assign) CGFloat farRadius;
