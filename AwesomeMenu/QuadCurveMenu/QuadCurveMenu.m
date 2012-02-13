@@ -14,8 +14,8 @@
 static CGFloat const kQuadCurveMenuDefaultNearRadius = 110.0f;
 static CGFloat const kQuadCurveMenuDefaultEndRadius = 120.0f;
 static CGFloat const kQuadCurveMenuDefaultFarRadius = 140.0f;
-static CGFloat const kQuadCurveMenuDefaultStartPointX = 60.0;
-static CGFloat const kQuadCurveMenuDefaultStartPointY = 934.0;
+static CGFloat const kQuadCurveMenuDefaultStartPointX = 30.0;
+static CGFloat const kQuadCurveMenuDefaultStartPointY = 30.0;
 static CGFloat const kQuadCurveMenuDefaultTimeOffset = 0.036f;
 static CGFloat const kQuadCurveMenuDefaultRotateAngle = 0.0;
 static CGFloat const kQuadCurveMenuDefaultMenuWholeAngle = M_PI * 2;
@@ -36,6 +36,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 @property (nonatomic, strong) NSMutableArray *menusSavedPosition;
 
 - (void)updateMenusData;
+- (void)updateMenusData:(BOOL)recenter;
 - (void)doAnimation:(NSDictionary *)animationConfig;
 
 - (CAAnimationGroup *)expandAnimationForItem:(QuadCurveMenuItem *)item;
@@ -64,6 +65,8 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 @synthesize menusArray;
 @synthesize menusSavedPosition;
 
+@synthesize shouldAnimateMainButton;
+
 #pragma mark - initialization & cleaning up
 
 - (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray
@@ -71,10 +74,10 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 	QuadCurveMenuItem *defaultButton = [[QuadCurveMenuItem alloc] initWithImage:[UIImage imageNamed:@"bg-addbutton.png"] highlightedImage:[UIImage imageNamed:@"bg-addbutton-highlighted.png"] 
 																   contentImage:[UIImage imageNamed:@"icon-plus.png"] contentHighlightedImage:[UIImage imageNamed:@"icon-plus-highlighted.png"]];
 	
-	return [self initWithFrame:frame menus:aMenusArray button:defaultButton];
+	return [self initWithFrame:frame menus:aMenusArray button:defaultButton startPoint:CGPointMake(kQuadCurveMenuDefaultStartPointX, kQuadCurveMenuDefaultStartPointY)];
 }
 
-- (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray button:(QuadCurveMenuItem *)aButton
+- (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray button:(QuadCurveMenuItem *)aButton startPoint:(CGPoint)aStartPoint
 {
     self = [super initWithFrame:frame];
     if (self) {
@@ -89,7 +92,8 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 		self.timeOffset = kQuadCurveMenuDefaultTimeOffset;
 		self.rotateAngle = kQuadCurveMenuDefaultRotateAngle;
 		self.menuWholeAngle = kQuadCurveMenuDefaultMenuWholeAngle;
-		self.startPoint = CGPointMake(kQuadCurveMenuDefaultStartPointX, kQuadCurveMenuDefaultStartPointY);
+		self.startPoint = aStartPoint;
+        self.shouldAnimateMainButton = YES;
         
         // layout menus
         self.menusArray = aMenusArray;
@@ -98,8 +102,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 		self.addButton = aButton;
 
 		self.addButton.delegate = self;
-        self.addButton.center = CGPointMake(kQuadCurveMenuDefaultStartPointX, kQuadCurveMenuDefaultStartPointY);
-		self.addButton.autoresizingMask = (UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin);
+        self.addButton.center = aStartPoint;
         [self addSubview:self.addButton];
 		
 		// array initialisation
@@ -107,7 +110,8 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 		
 		for (QuadCurveMenuItem *item in menusArray)
 		{
-			item.autoresizingMask = (UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin);
+			item.autoresizingMask = addButton.autoresizingMask;
+            item.center = addButton.center;
 			[self.menusSavedPosition addObject:[NSValue valueWithCGPoint:addButton.center]];
 		}
     }
@@ -217,6 +221,8 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 {
 	AnimationType animationType = AnimationTypeNone;
 	animating = YES;
+    
+    self.userInteractionEnabled = NO;
 	
 	if ([item isEqual:addButton])
 	{
@@ -224,7 +230,10 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 		animationType = (expanded) ? AnimationTypeExpand : AnimationTypeClose;
 		float angle = expanded ? - M_PI_4 : 0.0f;
 		[UIView animateWithDuration:0.2f animations:^{
-			item.transform = CGAffineTransformMakeRotation(angle);
+            if (self.shouldAnimateMainButton)
+            {
+                item.transform = CGAffineTransformMakeRotation(angle);
+            }
 		}];
 	}
 	else
@@ -265,6 +274,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 	if (animationOrder == animationCheck && flag)
 	{
 		animating = NO;
+        self.userInteractionEnabled = YES;
 	}
 }
 
@@ -346,9 +356,17 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 
 - (void)updateMenusData
 {
+    [self updateMenusData:YES];
+}
+
+- (void)updateMenusData:(BOOL)recenter
+{
 	short count = [menusArray count];
 	for (QuadCurveMenuItem *item in menusArray)
 	{
+        CGAffineTransform t = item.transform;
+        item.transform = CGAffineTransformIdentity;
+        
 		short i = [menusArray indexOfObject:item];
 		item.startPoint = startPoint;
         CGPoint endPoint = CGPointMake(startPoint.x + endRadius * sinf(i * menuWholeAngle / count), startPoint.y - endRadius * cosf(i * menuWholeAngle / count));
@@ -357,11 +375,16 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
         item.nearPoint = RotateCGPointAroundCenter(nearPoint, startPoint, rotateAngle);
         CGPoint farPoint = CGPointMake(startPoint.x + farRadius * sinf(i * menuWholeAngle / count), startPoint.y - farRadius * cosf(i * menuWholeAngle / count));
         item.farPoint = RotateCGPointAroundCenter(farPoint, startPoint, rotateAngle);  
-        item.center = item.startPoint;
+        if (recenter)
+        {
+            item.center = item.startPoint;
+        }
 		if (![item superview])
 		{
 			[self insertSubview:item atIndex:0];
 		}
+        
+        item.transform = t;
     }
 }
 
@@ -469,6 +492,12 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
     animationgroup.fillMode = kCAFillModeForwards;
     
     return animationgroup;
+}
+
+- (void)updateStartPoint
+{
+    startPoint = self.addButton.center;
+    [self updateMenusData:NO];
 }
 
 @end

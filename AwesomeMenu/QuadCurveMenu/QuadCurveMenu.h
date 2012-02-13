@@ -47,8 +47,12 @@ typedef enum {
 @property (nonatomic, assign) CGFloat rotateAngle;
 @property (nonatomic, assign) CGFloat menuWholeAngle;
 
+@property (nonatomic, assign) BOOL shouldAnimateMainButton;
+
 - (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray;
-- (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray button:(QuadCurveMenuItem *)aButton;
+- (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray button:(QuadCurveMenuItem *)aButton startPoint:(CGPoint)aStartPoint;
+
+- (void)updateStartPoint;
 
 
 @end
