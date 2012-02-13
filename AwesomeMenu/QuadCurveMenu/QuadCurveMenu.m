@@ -15,7 +15,7 @@ static CGFloat const kQuadCurveMenuDefaultNearRadius = 110.0f;
 static CGFloat const kQuadCurveMenuDefaultEndRadius = 120.0f;
 static CGFloat const kQuadCurveMenuDefaultFarRadius = 140.0f;
 static CGFloat const kQuadCurveMenuDefaultStartPointX = 60.0;
-static CGFloat const kQuadCurveMenuDefaultStartPointY = 60.0;
+static CGFloat const kQuadCurveMenuDefaultStartPointY = 934.0;
 static CGFloat const kQuadCurveMenuDefaultTimeOffset = 0.036f;
 static CGFloat const kQuadCurveMenuDefaultRotateAngle = 0.0;
 static CGFloat const kQuadCurveMenuDefaultMenuWholeAngle = M_PI * 2;
@@ -99,12 +99,15 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 
 		self.addButton.delegate = self;
         self.addButton.center = CGPointMake(kQuadCurveMenuDefaultStartPointX, kQuadCurveMenuDefaultStartPointY);
+		self.addButton.autoresizingMask = (UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin);
         [self addSubview:self.addButton];
 		
 		// array initialisation
 		self.menusSavedPosition = [NSMutableArray array];
+		
 		for (QuadCurveMenuItem *item in menusArray)
 		{
+			item.autoresizingMask = (UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin);
 			[self.menusSavedPosition addObject:[NSValue valueWithCGPoint:addButton.center]];
 		}
     }
