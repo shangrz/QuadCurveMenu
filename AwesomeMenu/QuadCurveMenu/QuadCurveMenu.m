@@ -76,10 +76,10 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 	QuadCurveMenuItem *defaultButton = [[QuadCurveMenuItem alloc] initWithImage:[UIImage imageNamed:@"bg-addbutton.png"] highlightedImage:[UIImage imageNamed:@"bg-addbutton-highlighted.png"] 
 																   contentImage:[UIImage imageNamed:@"icon-plus.png"] contentHighlightedImage:[UIImage imageNamed:@"icon-plus-highlighted.png"]];
 	
-	return [self initWithFrame:frame menus:aMenusArray button:defaultButton startPoint:CGPointMake(kQuadCurveMenuDefaultStartPointX, kQuadCurveMenuDefaultStartPointY)];
+	return [self initWithFrame:frame menus:aMenusArray startPoint:CGPointMake(kQuadCurveMenuDefaultStartPointX, kQuadCurveMenuDefaultStartPointY) button:defaultButton offset:CGAffineTransformIdentity];
 }
 
-- (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray button:(QuadCurveMenuItem *)aButton startPoint:(CGPoint)aStartPoint
+- (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray startPoint:(CGPoint)aStartPoint button:(QuadCurveMenuItem *)aButton offset:(CGAffineTransform)aTransform 
 {
     self = [super initWithFrame:frame];
     if (self) {
@@ -104,7 +104,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 		self.addButton = aButton;
 
 		self.addButton.delegate = self;
-		self.addButtonOffsetTransform = CGAffineTransformMakeTranslation(18.0f, 2.0f);
+		self.addButtonOffsetTransform = aTransform;
         self.addButton.center = CGPointApplyAffineTransform(aStartPoint, self.addButtonOffsetTransform);
         [self addSubview:self.addButton];
 		

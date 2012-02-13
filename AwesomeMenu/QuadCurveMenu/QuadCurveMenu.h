@@ -50,7 +50,7 @@ typedef enum {
 @property (nonatomic, assign) BOOL shouldAnimateMainButton;
 
 - (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray;
-- (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray button:(QuadCurveMenuItem *)aButton startPoint:(CGPoint)aStartPoint;
+- (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray startPoint:(CGPoint)aStartPoint button:(QuadCurveMenuItem *)aButton offset:(CGAffineTransform)aTransform;
 
 - (void)updateStartPoint;
 
