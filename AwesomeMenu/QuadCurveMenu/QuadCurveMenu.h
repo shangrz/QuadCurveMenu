@@ -48,6 +48,8 @@ typedef enum {
 @property (nonatomic, assign) CGFloat menuWholeAngle;
 
 - (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray;
+- (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray button:(QuadCurveMenuItem *)aButton;
+
 
 @end
 

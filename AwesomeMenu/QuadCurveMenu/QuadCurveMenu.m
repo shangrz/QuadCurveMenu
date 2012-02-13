@@ -68,6 +68,14 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 
 - (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray
 {
+	QuadCurveMenuItem *defaultButton = [[QuadCurveMenuItem alloc] initWithImage:[UIImage imageNamed:@"bg-addbutton.png"] highlightedImage:[UIImage imageNamed:@"bg-addbutton-highlighted.png"] 
+																   contentImage:[UIImage imageNamed:@"icon-plus.png"] contentHighlightedImage:[UIImage imageNamed:@"icon-plus-highlighted.png"]];
+	
+	return [self initWithFrame:frame menus:aMenusArray button:defaultButton];
+}
+
+- (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray button:(QuadCurveMenuItem *)aButton
+{
     self = [super initWithFrame:frame];
     if (self) {
 		
@@ -87,8 +95,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
         self.menusArray = aMenusArray;
         
         // add the "Add" Button.
-		self.addButton = [[QuadCurveMenuItem alloc] initWithImage:[UIImage imageNamed:@"bg-addbutton.png"] highlightedImage:[UIImage imageNamed:@"bg-addbutton-highlighted.png"] 
-													 contentImage:[UIImage imageNamed:@"icon-plus.png"] contentHighlightedImage:[UIImage imageNamed:@"icon-plus-highlighted.png"]];
+		self.addButton = aButton;
 
 		self.addButton.delegate = self;
         self.addButton.center = CGPointMake(kQuadCurveMenuDefaultStartPointX, kQuadCurveMenuDefaultStartPointY);
