@@ -104,7 +104,11 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 		self.addButton = aButton;
 
 		self.addButton.delegate = self;
+<<<<<<< HEAD
 		self.addButtonOffsetTransform = aTransform;
+=======
+		self.addButtonOffsetTransform = CGAffineTransformMakeTranslation(18.0f, 2.0f);
+>>>>>>> 35a47af50910735ea87aada100937a688aee1aed
         self.addButton.center = CGPointApplyAffineTransform(aStartPoint, self.addButtonOffsetTransform);
         [self addSubview:self.addButton];
 		
