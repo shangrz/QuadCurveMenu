@@ -34,6 +34,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 @property (nonatomic, strong) QuadCurveMenuItem *addButton;
 @property (nonatomic, strong) NSArray *menusArray;
 @property (nonatomic, strong) NSMutableArray *menusSavedPosition;
+@property (nonatomic, assign) CGAffineTransform addButtonOffsetTransform;
 
 - (void)updateMenusData;
 - (void)updateMenusData:(BOOL)recenter;
@@ -64,6 +65,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 @synthesize addButton;
 @synthesize menusArray;
 @synthesize menusSavedPosition;
+@synthesize addButtonOffsetTransform;
 
 @synthesize shouldAnimateMainButton;
 
@@ -102,7 +104,8 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 		self.addButton = aButton;
 
 		self.addButton.delegate = self;
-        self.addButton.center = aStartPoint;
+		self.addButtonOffsetTransform = CGAffineTransformMakeTranslation(18.0f, 2.0f);
+        self.addButton.center = CGPointApplyAffineTransform(aStartPoint, self.addButtonOffsetTransform);
         [self addSubview:self.addButton];
 		
 		// array initialisation
@@ -111,8 +114,8 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 		for (QuadCurveMenuItem *item in menusArray)
 		{
 			item.autoresizingMask = addButton.autoresizingMask;
-            item.center = addButton.center;
-			[self.menusSavedPosition addObject:[NSValue valueWithCGPoint:addButton.center]];
+            item.center = aStartPoint;
+			[self.menusSavedPosition addObject:[NSValue valueWithCGPoint:aStartPoint]];
 		}
     }
     return self;
@@ -496,7 +499,7 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
 
 - (void)updateStartPoint
 {
-    startPoint = self.addButton.center;
+    startPoint = CGPointApplyAffineTransform(self.addButton.center, CGAffineTransformInvert(self.addButtonOffsetTransform));
     [self updateMenusData:NO];
 }
 
