@@ -30,8 +30,8 @@ Then, setup the menu and options:
 You can also use menu options:
 
 to locate the center of "Add" button:
-
-	menu.startPoint = CGPointMake(160.0, 240.0);
+	[menu updateStartPoint:CGPointMake(160.0, 240.0)];// shangrz version use this	
+	//menu.startPoint = CGPointMake(160.0, 240.0);
 
 to set the rotate angle:
 
