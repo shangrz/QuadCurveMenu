@@ -54,27 +54,33 @@
 	QuadCurveMenuItem *starMenuItem8 = [[QuadCurveMenuItem alloc] initWithImage:storyMenuItemImage highlightedImage:storyMenuItemImagePressed 
                                                                    contentImage:starImage contentHighlightedImage:nil];
     
-	QuadCurveMenuItem *starMenuItem9 = [[QuadCurveMenuItem alloc] initWithImage:storyMenuItemImage highlightedImage:storyMenuItemImagePressed 
-                                                                   contentImage:starImage contentHighlightedImage:nil];
+	 
     
-    NSArray *menus = [NSArray arrayWithObjects:starMenuItem1, starMenuItem2, starMenuItem3, starMenuItem4, starMenuItem5, starMenuItem6, starMenuItem7,starMenuItem8,starMenuItem9, nil];
+    NSArray *menus = [NSArray arrayWithObjects:starMenuItem1, starMenuItem2, starMenuItem3, starMenuItem4, starMenuItem5, starMenuItem6, starMenuItem7,starMenuItem8, nil];
     
-    QuadCurveMenu *menu = [[QuadCurveMenu alloc] initWithFrame:self.view.bounds menus:menus];
-	
-	// customize menu
-
-	menu.rotateAngle = M_PI_2;
-	menu.menuWholeAngle = menu.rotateAngle / (menus.count - 1) * menus.count;
-	/*
-	menu.timeOffset = 0.2f;
+    QuadCurveMenu *menu = [[QuadCurveMenu alloc] initWithFrame:self.view.bounds menus:menus ];
+    
+    //set menu at center :
+    [menu updateStartPoint:CGPointMake(160.0, 240.0)];	// customize menu
+	//menu.rotateAngle = M_PI_2;
+	menu.rotateAngle = -M_PI_2;
+    //menu.menuWholeAngle = menu.rotateAngle / (menus.count - 1) * menus.count;
+    menu.menuWholeAngle  = M_PI/ (menus.count - 1) * menus.count ;     // div make LR justify
+	menu.timeOffset = 0.08f;
 	menu.farRadius = 180.0f;
 	menu.endRadius = 100.0f;
-	menu.nearRadius = 50.0f;
-	*/
+	menu.nearRadius = 80.0f;
+    
+    
+    
+    
+    
+   
 
     menu.delegate = self;
-	
     [self.view addSubview:menu];
+    
+    
 	
 }
 

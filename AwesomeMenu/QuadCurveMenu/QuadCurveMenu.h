@@ -53,6 +53,7 @@ typedef enum {
 - (id)initWithFrame:(CGRect)frame menus:(NSArray *)aMenusArray startPoint:(CGPoint)aStartPoint button:(QuadCurveMenuItem *)aButton offset:(CGAffineTransform)aTransform;
 
 - (void)updateStartPoint;
+- (void)updateStartPoint:(CGPoint)aStartPoint;
 
 
 @end

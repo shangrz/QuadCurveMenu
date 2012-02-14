@@ -503,4 +503,10 @@ static CGPoint RotateCGPointAroundCenter(CGPoint point, CGPoint center, float an
     [self updateMenusData:NO];
 }
 
+-(void) updateStartPoint:(CGPoint)aStartPoint
+{
+    self.addButton.center = aStartPoint;
+    [self updateStartPoint];
+}
+
 @end
